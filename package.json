@@ -1,0 +1,5 @@
+{
+  "name": "stride-proxy",
+  "version": "1.0.0",
+  "description": "CORS proxy for STRIDE to n8n webhook"
+}
