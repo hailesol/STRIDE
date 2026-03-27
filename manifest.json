@@ -2,7 +2,6 @@
   "name": "STRIDE",
   "short_name": "STRIDE",
   "description": "AI-powered personalised monthly running training plans",
-  "start_url": "STRIDE/index.html",
   "display": "standalone",
   "background_color": "#0a0a0f",
   "theme_color": "#e8ff47",
