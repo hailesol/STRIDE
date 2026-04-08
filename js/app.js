@@ -228,7 +228,7 @@ ${hrSection}
 
 Generate a workout for EVERY day 1–${daysInMonth}.
 
-CRITICAL: Respond ONLY with a valid JSON array, no markdown, no explanation.
+CRITICAL: Respond ONLY with a valid JSON array, no markdown, no explanation. Return ONLY valid JSON. Do not include any text outside the JSON. Do not use triple backticks. Ensure arrays and objects are fully closed.
 
 Each day MUST use this exact JSON structure:
 {
