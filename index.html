@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>STRIDE — Running Plan Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,700;1,300&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/styles.css">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#e8ff47">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="STRIDE">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+</head>
+<body>
+
+<!-- ══ AUTH SCREEN ══ -->
+<div id="auth-screen" class="screen active">
+  <div class="auth-left">
+    <div class="auth-logo">STRIDE</div>
+    <div class="auth-tagline">AI-Powered Running Plans</div>
+    <div class="auth-stats">
+      <div class="stat-item">
+        <div class="stat-num">5K</div>
+        <div class="stat-label">to Marathon</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-num">AI</div>
+        <div class="stat-label">Generated Plans</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-num">∞</div>
+        <div class="stat-label">Customisable</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="auth-right">
+    <div class="auth-tabs">
+      <button class="auth-tab active" onclick="switchTab('login')">Login</button>
+      <button class="auth-tab" onclick="switchTab('signup')">Sign Up</button>
+    </div>
+
+    <!-- LOGIN FORM -->
+    <form class="auth-form active" id="login-form" onsubmit="handleLogin(event)">
+      <div class="form-group">
+        <label>Email Address</label>
+        <input type="email" id="login-email" placeholder="you@example.com" required>
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <input type="password" id="login-password" placeholder="••••••••" required>
+      </div>
+      <div class="error-msg" id="login-error">Invalid email or password.</div>
+      <button type="submit" class="btn-primary">Login</button>
+    </form>
+
+    <!-- SIGNUP FORM -->
+    <form class="auth-form" id="signup-form" onsubmit="handleSignup(event)">
+      <div class="form-group">
+        <label>Your Name</label>
+        <input type="text" id="signup-name" placeholder="Alex Runner" required>
+      </div>
+      <div class="form-group">
+        <label>Email Address</label>
+        <input type="email" id="signup-email" placeholder="you@example.com" required>
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <input type="password" id="signup-password" placeholder="Min 6 characters" required minlength="6">
+      </div>
+      <div class="error-msg" id="signup-error">Account already exists with this email.</div>
+      <button type="submit" class="btn-primary">Create Account</button>
+    </form>
+  </div>
+</div>
+
+<!-- ══ DASHBOARD SCREEN ══ -->
+<div id="dashboard-screen" class="screen">
+  <div class="topbar">
+    <div class="topbar-logo">STRIDE</div>
+    <div class="topbar-right">
+      <div class="user-pill">
+        <div class="user-avatar" id="user-avatar-initials">A</div>
+        <span class="user-name" id="topbar-username">Athlete</span>
+      </div>
+      <button class="btn-logout" onclick="logout()">Log out</button>
+    </div>
+  </div>
+
+  <div class="dashboard-body">
+    <!-- SIDEBAR -->
+    <div class="planner-sidebar">
+      <div>
+        <div class="sidebar-title">Build Your Plan</div>
+        <div class="sidebar-subtitle">Tell us about your running and we'll generate a personalised monthly training plan.</div>
+      </div>
+
+      <div class="form-divider"></div>
+
+      <!-- FITNESS -->
+      <div class="field-group">
+        <div class="section-label">Your Current Fitness</div>
+        <div class="form-group">
+          <label>5K PB Time <span class="label-hint">— or leave blank if none</span></label>
+          <div class="time-input-row" id="pb-time-row">
+            <div class="time-unit">
+              <input type="number" id="pb-mins" min="0" max="99" placeholder="00">
+              <span class="time-label">min</span>
+            </div>
+            <div class="time-sep">:</div>
+            <div class="time-unit">
+              <input type="number" id="pb-secs" min="0" max="59" placeholder="00">
+              <span class="time-label">sec</span>
+            </div>
+          </div>
+          <div class="time-preview" id="pb-preview"></div>
+        </div>
+
+        <div class="form-group">
+          <label>Max Heart Rate <span class="label-hint">— bpm</span></label>
+          <div style="display:flex; gap:10px; align-items:center;">
+            <input type="number" id="max-hr" min="100" max="220" placeholder="e.g. 185" style="flex:1;">
+            <button type="button" class="btn-hr-zones" id="btn-view-zones" onclick="toggleHRZones()" disabled>View Zones</button>
+          </div>
+          <div class="hr-hint">Don't know it? Use 220 − your age as an estimate.</div>
+        </div>
+      </div>
+
+      <!-- HR ZONES PANEL -->
+      <div class="hr-zones-panel" id="hr-zones-panel" style="display:none;">
+        <div class="hz-title">Your HR Zones</div>
+        <div class="hz-grid" id="hz-grid"></div>
+      </div>
+
+      <!-- PACE UNIT -->
+      <div class="field-group">
+        <div class="section-label">Pace Preference</div>
+        <div class="pace-toggle">
+          <button type="button" class="pace-btn active" id="pace-km" onclick="setPaceUnit('km')">min/km</button>
+          <button type="button" class="pace-btn" id="pace-mile" onclick="setPaceUnit('mile')">min/mile</button>
+        </div>
+      </div>
+
+      <!-- RACE GOAL -->
+      <div class="field-group">
+        <div class="section-label">Race Goal</div>
+        <div class="form-group">
+          <label>Goal Distance</label>
+          <select id="goal-distance">
+            <option value="">Select distance</option>
+            <option value="5K">5K</option>
+            <option value="10K">10K</option>
+            <option value="Half Marathon (21.1km)">Half Marathon</option>
+            <option value="Marathon (42.2km)">Marathon</option>
+            <option value="Ultra (50K+)">Ultra (50K+)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Goal Finish Time</label>
+          <div class="time-input-row" id="goal-time-row">
+            <div class="time-unit">
+              <input type="number" id="goal-hrs" min="0" max="23" placeholder="00">
+              <span class="time-label">hr</span>
+            </div>
+            <div class="time-sep">:</div>
+            <div class="time-unit">
+              <input type="number" id="goal-mins" min="0" max="59" placeholder="00">
+              <span class="time-label">min</span>
+            </div>
+            <div class="time-sep">:</div>
+            <div class="time-unit">
+              <input type="number" id="goal-secs" min="0" max="59" placeholder="00">
+              <span class="time-label">sec</span>
+            </div>
+          </div>
+          <div class="time-preview" id="goal-preview"></div>
+        </div>
+      </div>
+
+      <!-- TRAINING FREQUENCY -->
+      <div class="field-group">
+        <div class="section-label">Training Frequency</div>
+        <div class="form-group">
+          <label>Days Per Week</label>
+          <select id="training-days">
+            <option value="">Select days</option>
+            <option value="1">1 day/week</option>
+            <option value="2">2 days/week</option>
+            <option value="3">3 days/week</option>
+            <option value="4">4 days/week</option>
+            <option value="5">5 days/week</option>
+            <option value="6">6 days/week</option>
+            <option value="7">7 days/week</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-divider"></div>
+
+      <button class="btn-generate" id="generate-btn" onclick="generatePlan()">
+        ⚡ Generate Plan
+      </button>
+    </div>
+
+    <!-- CALENDAR AREA -->
+    <div class="calendar-area">
+      <div class="calendar-header">
+        <div>
+          <div class="calendar-month-title" id="calendar-month-title">
+            Your <span>Monthly</span> Plan
+          </div>
+          <div id="plan-info-row" class="info-row" style="margin-top:10px; display:none;"></div>
+        </div>
+        <div class="legend" id="calendar-legend" style="display:none;">
+          <div class="legend-item"><div class="legend-dot" style="background:var(--easy)"></div>Easy</div>
+          <div class="legend-item"><div class="legend-dot" style="background:var(--tempo)"></div>Tempo</div>
+          <div class="legend-item"><div class="legend-dot" style="background:var(--interval)"></div>Intervals</div>
+          <div class="legend-item"><div class="legend-dot" style="background:var(--long)"></div>Long Run</div>
+          <div class="legend-item"><div class="legend-dot" style="background:var(--rest)"></div>Rest</div>
+        </div>
+      </div>
+
+      <div id="calendar-container">
+        <div class="empty-calendar">
+          <div class="empty-icon">🏃</div>
+          <div class="empty-text">Your plan will appear here</div>
+          <div style="font-size:14px; color:var(--muted); text-align:center; max-width:280px;">Fill in your details and hit Generate Plan to get your personalised monthly training calendar</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ LOADING ══ -->
+<div class="loading-overlay" id="loading-overlay">
+  <div class="loader-ring"></div>
+  <div class="loading-text" id="loading-text">Generating Your Plan</div>
+  <div class="loading-sub" id="loading-sub">Our AI is crafting a personalised monthly training schedule based on your profile...</div>
+</div>
+
+<!-- ══ WORKOUT DETAIL MODAL ══ -->
+<div class="modal-overlay" id="workout-modal">
+  <div class="modal">
+    <button class="btn-close-modal" onclick="closeModal()">✕</button>
+    <div class="modal-header">
+      <div>
+        <div class="modal-title" id="modal-title">Workout Details</div>
+        <div class="modal-sub" id="modal-date">Monday, 3rd March</div>
+      </div>
+      <div class="workout-detail-type" id="modal-type-badge">Easy</div>
+    </div>
+
+    <!-- Structured sections rendered by JS -->
+    <div id="modal-body"></div>
+
+    <div class="modal-footer">💡 Drag this workout to any other day to swap it into your schedule.</div>
+  </div>
+</div>
+
+<!-- ══ TOAST ══ -->
+<div class="toast" id="toast"></div>
+
+<script src="js/auth.js"></script>
+<script src="js/calendar.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>

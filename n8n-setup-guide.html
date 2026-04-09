@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>STRIDE — n8n Setup Guide</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --surface: #12121a;
+    --surface2: #1a1a26;
+    --border: #2a2a3d;
+    --accent: #e8ff47;
+    --accent2: #ff6b35;
+    --text: #f0f0f5;
+    --muted: #7070a0;
+    --success: #2ed573;
+    --easy: #4ecdc4;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    line-height: 1.6;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: radial-gradient(ellipse 60% 40% at 80% 20%, rgba(232,255,71,0.04) 0%, transparent 60%);
+    pointer-events: none;
+  }
+
+  .header {
+    border-bottom: 1px solid var(--border);
+    padding: 24px 48px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    position: sticky;
+    top: 0;
+    background: rgba(10,10,15,0.95);
+    backdrop-filter: blur(12px);
+    z-index: 10;
+  }
+
+  .logo { font-family: 'Bebas Neue', sans-serif; font-size: 28px; letter-spacing: 4px; color: var(--accent); }
+  .header-divider { width: 1px; height: 28px; background: var(--border); }
+  .header-title { font-size: 14px; color: var(--muted); letter-spacing: 1px; }
+
+  .container { max-width: 860px; margin: 0 auto; padding: 56px 24px 80px; }
+
+  .hero { text-align: center; margin-bottom: 64px; }
+
+  .hero-label {
+    display: inline-block;
+    background: rgba(232,255,71,0.1);
+    border: 1px solid rgba(232,255,71,0.3);
+    color: var(--accent);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    padding: 6px 16px;
+    border-radius: 100px;
+    margin-bottom: 20px;
+  }
+
+  .hero h1 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 56px;
+    letter-spacing: 4px;
+    line-height: 1;
+    margin-bottom: 16px;
+  }
+
+  .hero h1 span { color: var(--accent); }
+
+  .hero p { font-size: 16px; color: var(--muted); max-width: 500px; margin: 0 auto; }
+
+  /* Flow diagram */
+  .flow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+    margin: 48px 0;
+    flex-wrap: wrap;
+  }
+
+  .flow-node {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 20px;
+    text-align: center;
+    min-width: 110px;
+  }
+
+  .flow-node .icon { font-size: 24px; margin-bottom: 4px; }
+  .flow-node .name { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; }
+  .flow-node .sub  { font-size: 10px; color: var(--muted); margin-top: 2px; }
+
+  .flow-arrow {
+    font-size: 20px;
+    color: var(--accent);
+    padding: 0 8px;
+    flex-shrink: 0;
+  }
+
+  /* Parts */
+  .part {
+    margin-bottom: 48px;
+  }
+
+  .part-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+
+  .part-num {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--accent);
+    color: #0a0a0f;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .part-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 28px;
+    letter-spacing: 2px;
+  }
+
+  .part-time {
+    font-size: 12px;
+    color: var(--muted);
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    padding: 3px 10px;
+    border-radius: 100px;
+    margin-left: auto;
+  }
+
+  /* Steps */
+  .steps { display: flex; flex-direction: column; gap: 16px; }
+
+  .step {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px 24px;
+    display: flex;
+    gap: 18px;
+    align-items: flex-start;
+  }
+
+  .step-num {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: 1.5px solid var(--accent);
+    color: var(--accent);
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  .step-body { flex: 1; }
+  .step-title { font-weight: 700; font-size: 15px; margin-bottom: 6px; }
+  .step-desc { font-size: 14px; color: var(--muted); line-height: 1.6; }
+
+  .step-desc a { color: var(--accent); text-decoration: none; }
+  .step-desc a:hover { text-decoration: underline; }
+
+  .step-desc strong { color: var(--text); }
+
+  .step-desc .key {
+    display: inline-block;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 1px 8px;
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    color: var(--easy);
+    margin: 1px 2px;
+  }
+
+  /* Code blocks */
+  .code-block {
+    background: #0d0d14;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px 20px;
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    line-height: 1.7;
+    color: var(--easy);
+    margin-top: 12px;
+    overflow-x: auto;
+    white-space: pre;
+    position: relative;
+  }
+
+  .code-label {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: var(--muted);
+    margin-bottom: 6px;
+    font-family: 'DM Sans', sans-serif;
+  }
+
+  .copy-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--muted);
+    font-size: 11px;
+    padding: 4px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    transition: all 0.2s;
+  }
+
+  .copy-btn:hover { color: var(--accent); border-color: var(--accent); }
+
+  /* Warning box */
+  .warning {
+    background: rgba(255,107,53,0.1);
+    border: 1px solid rgba(255,107,53,0.4);
+    border-radius: 8px;
+    padding: 14px 18px;
+    font-size: 13px;
+    color: var(--accent2);
+    margin-top: 12px;
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+  }
+
+  .tip {
+    background: rgba(232,255,71,0.06);
+    border: 1px solid rgba(232,255,71,0.2);
+    border-radius: 8px;
+    padding: 14px 18px;
+    font-size: 13px;
+    color: var(--accent);
+    margin-top: 12px;
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+  }
+
+  /* Troubleshooting table */
+  .trouble-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+    margin-top: 16px;
+  }
+
+  .trouble-table th {
+    text-align: left;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: var(--muted);
+    padding: 10px 16px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .trouble-table td {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+  }
+
+  .trouble-table tr:last-child td { border-bottom: none; }
+
+  .trouble-table td:first-child { color: var(--accent2); font-weight: 600; }
+  .trouble-table td:last-child  { color: var(--muted); }
+
+  /* Divider */
+  .divider { height: 1px; background: var(--border); margin: 48px 0; }
+
+  /* Workout types */
+  .types-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 10px;
+    margin-top: 16px;
+  }
+
+  .type-chip {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px;
+    text-align: center;
+  }
+
+  .type-dot {
+    width: 12px; height: 12px;
+    border-radius: 3px;
+    margin: 0 auto 6px;
+  }
+
+  .type-name { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; }
+
+  @media (max-width: 640px) {
+    .header { padding: 16px 20px; }
+    .hero h1 { font-size: 36px; }
+    .flow { gap: 8px; }
+    .types-grid { grid-template-columns: repeat(3, 1fr); }
+    .container { padding: 32px 16px 60px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo">STRIDE</div>
+  <div class="header-divider"></div>
+  <div class="header-title">n8n + Google Gemini Setup Guide</div>
+</div>
+
+<div class="container">
+
+  <div class="hero">
+    <div class="hero-label">Integration Guide</div>
+    <h1>Connect <span>n8n</span> &<br>Gemini in 3 Parts</h1>
+    <p>Follow these steps once and your STRIDE dashboard will generate AI training plans forever.</p>
+  </div>
+
+  <!-- Flow diagram -->
+  <div class="flow">
+    <div class="flow-node">
+      <div class="icon">🏃</div>
+      <div class="name">STRIDE</div>
+      <div class="sub">Your browser</div>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-node">
+      <div class="icon">🔗</div>
+      <div class="name">Webhook</div>
+      <div class="sub">n8n trigger</div>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-node">
+      <div class="icon">✨</div>
+      <div class="name">Gemini</div>
+      <div class="sub">Google AI</div>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-node">
+      <div class="icon">📅</div>
+      <div class="name">Calendar</div>
+      <div class="sub">30-day plan</div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- PART 1 -->
+  <div class="part">
+    <div class="part-header">
+      <div class="part-num">1</div>
+      <div class="part-title">Get your Google Gemini API Key</div>
+      <div class="part-time">~5 mins</div>
+    </div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <div class="step-title">Go to Google AI Studio</div>
+          <div class="step-desc">Visit <a href="https://aistudio.google.com" target="_blank">aistudio.google.com</a> and sign in with your Google account.</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <div class="step-title">Create an API key</div>
+          <div class="step-desc">Click <strong>Get API Key</strong> (left sidebar) → <strong>Create API key</strong> → select or create a Google Cloud project when prompted.</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-body">
+          <div class="step-title">Copy and save the key</div>
+          <div class="step-desc">Your key starts with <span class="key">AIza...</span> — copy it and save it somewhere safe (Notes, password manager).</div>
+          <div class="tip">✅ Gemini API has a generous free tier — generating training plans will likely cost you nothing at all.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- PART 2 -->
+  <div class="part">
+    <div class="part-header">
+      <div class="part-num">2</div>
+      <div class="part-title">Set up n8n</div>
+      <div class="part-time">~5 mins</div>
+    </div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <div class="step-title">Create a free n8n Cloud account</div>
+          <div class="step-desc">Go to <a href="https://n8n.io" target="_blank">n8n.io</a> → click <strong>Start for free</strong> → sign up. You'll land on your n8n dashboard.</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <div class="step-title">Create a new workflow</div>
+          <div class="step-desc">Click <strong>+ New Workflow</strong> in the top right. Name it <strong>"STRIDE Plan Generator"</strong>.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- PART 3 -->
+  <div class="part">
+    <div class="part-header">
+      <div class="part-num">3</div>
+      <div class="part-title">Build the Workflow</div>
+      <div class="part-time">~10 mins</div>
+    </div>
+    <div class="steps">
+
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <div class="step-title">Add a Webhook node</div>
+          <div class="step-desc">
+            Click <strong>+</strong> on the canvas → search <strong>Webhook</strong> → select it.<br><br>
+            In the settings panel set:
+            <ul style="margin: 8px 0 0 16px; color: var(--muted);">
+              <li><strong style="color:var(--text)">HTTP Method</strong> → <span class="key">POST</span></li>
+              <li><strong style="color:var(--text)">Path</strong> → type <span class="key">stride-plan</span></li>
+              <li><strong style="color:var(--text)">Respond</strong> → <span class="key">Using Respond to Webhook Node</span></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <div class="step-title">Add a Google Gemini node</div>
+          <div class="step-desc">
+            Click <strong>+</strong> after the Webhook → search <strong>Google Gemini</strong> → select it → choose <strong>Generate Text</strong> as the operation.<br><br>
+            Click <strong>Create new credential</strong>:
+            <ul style="margin: 8px 0 8px 16px; color: var(--muted);">
+              <li>Select <strong style="color:var(--text)">API Key</strong> as the auth type</li>
+              <li>Paste your <span class="key">AIza...</span> key → click Save</li>
+            </ul>
+            Then set:
+            <ul style="margin: 8px 0 8px 16px; color: var(--muted);">
+              <li><strong style="color:var(--text)">Model</strong> → <span class="key">gemini-1.5-flash</span> (fast &amp; free) or <span class="key">gemini-1.5-pro</span> (more detailed)</li>
+              <li><strong style="color:var(--text)">Prompt</strong> → click the <span class="key">{}</span> expression icon and paste:</li>
+            </ul>
+          </div>
+          <div class="code-label">Paste this into the Prompt field</div>
+          <div class="code-block" id="code1">{{ $json.body.prompt }}<button class="copy-btn" onclick="copyCode('code1', this)">Copy</button></div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-body">
+          <div class="step-title">Add a "Respond to Webhook" node</div>
+          <div class="step-desc">
+            Click <strong>+</strong> after Gemini → search <strong>Respond to Webhook</strong> → select it.<br><br>
+            Set <strong>Respond With</strong> → <span class="key">JSON</span><br><br>
+            In the <strong>Response Body</strong> field, click <span class="key">{}</span> and paste:
+          </div>
+          <div class="code-label">Paste this into Response Body</div>
+          <div class="code-block" id="code2">{ "workouts": {{ $json.text }} }<button class="copy-btn" onclick="copyCode('code2', this)">Copy</button></div>
+          <div class="tip">💡 Gemini returns its response in <span class="key">$json.text</span> — slightly different from OpenAI. STRIDE parses the JSON array inside automatically.</div>
+          <div class="warning">⚠️ If you get an error, open the Gemini node's output in the n8n execution log and check the exact field name — it may be <span class="key">$json.candidates[0].content.parts[0].text</span> depending on your n8n version.</div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">4</div>
+        <div class="step-body">
+          <div class="step-title">Get your Webhook URL</div>
+          <div class="step-desc">
+            Click on the <strong>Webhook node</strong>. You'll see two URLs:<br><br>
+            <ul style="margin: 8px 0 0 16px; color: var(--muted);">
+              <li><strong style="color:var(--text)">Test URL</strong> — only works while n8n is open and listening</li>
+              <li><strong style="color:var(--accent)">Production URL</strong> — works 24/7 once the workflow is active ← use this one</li>
+            </ul><br>
+            Copy the <strong>Production URL</strong>. It looks like:
+          </div>
+          <div class="code-block" style="color: var(--accent);">https://yourname.app.n8n.cloud/webhook/stride-plan</div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">5</div>
+        <div class="step-body">
+          <div class="step-title">Activate the workflow</div>
+          <div class="step-desc">Click the <strong>Inactive</strong> toggle in the top right of n8n → flip it to <strong>Active</strong>. Your webhook is now live.</div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">6</div>
+        <div class="step-body">
+          <div class="step-title">Paste the URL into STRIDE and test!</div>
+          <div class="step-desc">Go back to your STRIDE dashboard → paste the Production URL into the <strong>n8n Webhook URL</strong> field → fill in your running details → hit <strong>⚡ Generate Plan</strong>.</div>
+          <div class="tip">🎉 If it works, your calendar will fill up with a full month of workouts in about 10–20 seconds!</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- Workout types reference -->
+  <div class="part">
+    <div class="part-header">
+      <div class="part-num" style="background: var(--surface2); color: var(--text); border: 1px solid var(--border);">?</div>
+      <div class="part-title">Workout Type Reference</div>
+    </div>
+    <p style="color: var(--muted); font-size: 14px; margin-bottom: 4px;">Gemini assigns each day one of these types. Each renders a different colour on your calendar.</p>
+    <div class="types-grid">
+      <div class="type-chip"><div class="type-dot" style="background:#4ecdc4"></div><div class="type-name" style="color:#4ecdc4">easy</div></div>
+      <div class="type-chip"><div class="type-dot" style="background:#ffe66d"></div><div class="type-name" style="color:#ffe66d">tempo</div></div>
+      <div class="type-chip"><div class="type-dot" style="background:#ff6b6b"></div><div class="type-name" style="color:#ff6b6b">interval</div></div>
+      <div class="type-chip"><div class="type-dot" style="background:#a29bfe"></div><div class="type-name" style="color:#a29bfe">long</div></div>
+      <div class="type-chip"><div class="type-dot" style="background:#3a3a55"></div><div class="type-name" style="color:#7070a0">rest</div></div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- Troubleshooting -->
+  <div class="part">
+    <div class="part-header">
+      <div class="part-num" style="background: var(--accent2); color: #fff;">!</div>
+      <div class="part-title">Troubleshooting</div>
+    </div>
+    <table class="trouble-table">
+      <tr>
+        <th>Problem</th>
+        <th>Fix</th>
+      </tr>
+      <tr>
+        <td>"Something went wrong"</td>
+        <td>Open n8n → Executions (left sidebar) → click the failed run to see the error</td>
+      </tr>
+      <tr>
+        <td>Webhook not receiving data</td>
+        <td>Make sure you're using the Production URL (not Test URL) and the workflow toggle is Active</td>
+      </tr>
+      <tr>
+        <td>Gemini error / 403</td>
+        <td>Check your API key starts with AIza... and is pasted correctly. Make sure the Gemini API is enabled in your Google Cloud project at console.cloud.google.com</td>
+      </tr>
+      <tr>
+        <td>Calendar shows empty</td>
+        <td>Gemini may have wrapped the JSON in markdown code fences (```json). STRIDE strips these automatically, but check the Executions log for the raw response to confirm</td>
+      </tr>
+      <tr>
+        <td>CORS error in browser console</td>
+        <td>Add a "Set Headers" node after the Webhook node. Add header: <span class="key">Access-Control-Allow-Origin: *</span></td>
+      </tr>
+    </table>
+  </div>
+
+</div>
+
+<script>
+function copyCode(id, btn) {
+  const block = document.getElementById(id);
+  // Get text without the button text
+  const text = block.childNodes[0].textContent.trim();
+  navigator.clipboard.writeText(text).then(() => {
+    btn.textContent = 'Copied!';
+    setTimeout(() => btn.textContent = 'Copy', 2000);
+  });
+}
+</script>
+</body>
+</html>
